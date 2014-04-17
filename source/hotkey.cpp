@@ -163,6 +163,9 @@ void Hotkey::ManifestAllHotkeysHotstringsHooks()
 	for (i = 0; i < sHotkeyCount; ++i)
 	{
 		Hotkey &hot = *shk[i]; // For performance and convenience.
+
+		TextInterpret(hot.mName, &hot, true); // Reinterpret hotkey in case the keyboard layout changed
+
 		if (   hk_is_inactive[i] = ((g_IsSuspended && !hot.IsExemptFromSuspend())
 			|| hot.IsCompletelyDisabled())   ) // Listed last for short-circuit performance.
 		{
