@@ -1534,6 +1534,9 @@ Hotkey::Hotkey(HotkeyIDType aID, Label *aJumpToLabel, HookActionType aHookAction
 	}
 	// Above has ensured that both mFirstVariant and mLastVariant are non-NULL, so callers can rely on that.
 
+	// Fill the properties structure to avoid future costly calls to TextToModifiers()
+	TextToModifiers(mName, NULL, &mProperties);
+
 	// Always assign the ID last, right before a successful return, so that the caller is notified
 	// that the constructor succeeded:
 	mConstructedOK = true;
@@ -2101,7 +2104,7 @@ Hotkey *Hotkey::FindHotkeyByTrueNature(LPTSTR aName, bool &aSuffixHasTilde, bool
 //    one of them would never fire because the hook isn't capable or storing two hotkey IDs for the same combination of
 //    modifiers+VK/SC.
 {
-	HotkeyProperties prop_candidate, prop_existing;
+	HotkeyProperties prop_candidate;
 	TextToModifiers(aName, NULL, &prop_candidate);
 	aSuffixHasTilde = prop_candidate.suffix_has_tilde; // Set for caller.
 	aHookIsMandatory = prop_candidate.hook_is_mandatory; // Set for caller.
@@ -2110,7 +2113,7 @@ Hotkey *Hotkey::FindHotkeyByTrueNature(LPTSTR aName, bool &aSuffixHasTilde, bool
 
 	for (int i = 0; i < sHotkeyCount; ++i)
 	{
-		TextToModifiers(shk[i]->mName, NULL, &prop_existing);
+		HotkeyProperties const &prop_existing = shk[i]->mProperties;
 		if (   prop_existing.modifiers == prop_candidate.modifiers
 			&& prop_existing.modifiersLR == prop_candidate.modifiersLR
 			&& prop_existing.is_key_up == prop_candidate.is_key_up

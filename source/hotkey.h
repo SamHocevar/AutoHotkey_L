@@ -233,7 +233,8 @@ public:
 		bool has_asterisk;
 		bool is_key_up;
 		bool hook_is_mandatory;
-	};
+	}
+	mProperties;
 	static LPTSTR TextToModifiers(LPTSTR aText, Hotkey *aThisHotkey, HotkeyProperties *aProperties = NULL);
 	static ResultType TextToKey(LPTSTR aText, LPTSTR aHotkeyName, bool aIsModifier, Hotkey *aThisHotkey, bool aUseErrorLevel);
 

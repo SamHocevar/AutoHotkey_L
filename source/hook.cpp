@@ -2700,7 +2700,7 @@ bool CollectInput(KBDLLHOOKSTRUCT &aEvent, const vk_type aVK, const sc_type aSC,
 	// (for which the dead key is pending): ToAsciiEx() consumes previous/pending dead key, which causes the
 	// active window's call of ToAsciiEx() to fail to see a dead key. So unless the program reinserts the dead key
 	// after the call to ToAsciiEx() but before allowing the dead key's successor key to pass through to the
-	// active window, that window would see a non-diacritic like "u" instead of û.  In other words, the program
+	// active window, that window would see a non-diacritic like "u" instead of ?.  In other words, the program
 	// "uses up" the dead key to populate its own hotstring buffer, depriving the active window of the dead key.
 	//
 	// JAVA ISSUE: Hotstrings are known to disrupt dead keys in Java apps on some systems (though not my XP one).
@@ -2839,7 +2839,7 @@ bool CollectInput(KBDLLHOOKSTRUCT &aEvent, const vk_type aVK, const sc_type aSC,
 				}
 				else // case insensitive
 					// v1.0.43.03: Using CharLower vs. tolower seems the best default behavior (even though slower)
-					// so that languages in which the higher ANSI characters are common will see "Ä" == "ä", etc.
+					// so that languages in which the higher ANSI characters are common will see "?" == "?", etc.
 					for (; cphs >= hs.mString; --cpbuf, --cphs)
 						if (ltolower(*cpbuf) != ltolower(*cphs)) // v1.0.43.04: Fixed crash by properly casting to UCHAR (via macro).
 							break;
@@ -3051,9 +3051,9 @@ bool CollectInput(KBDLLHOOKSTRUCT &aEvent, const vk_type aVK, const sc_type aSC,
 	// dead key reinserted below, which in turn would cause the hotstring's first backspace to fire
 	// the dead key (which kills the backspace, turning it into the dead key character itself).
 	// For example:
-	// :*:jsá::jsmith@somedomain.com
+	// :*:js?::jsmith@somedomain.com
 	// On the Spanish (Mexico) keyboard layout, one would type accent (English left bracket) followed by
-	// the letter "a" to produce á.
+	// the letter "a" to produce ?.
 	if (dead_key_sequence_complete)
 	{
 		vk_type vk_to_send = sPendingDeadKeyVK; // To facilitate early reset below.
@@ -3935,6 +3935,15 @@ void ChangeHookState(Hotkey *aHK[], int aHK_count, HookType aWhichHook, HookType
 		bool prev_hk_is_key_up, this_hk_is_key_up;
 		HotkeyIDType this_hk_id;
 
+		static mod_type modifiers_lr_lut[MODLR_MAX];
+		static bool modifiers_lr_lut_ready = false;
+		if (!modifiers_lr_lut_ready)
+		{
+			for (modifiersLR = 0; modifiersLR <= MODLR_MAX; ++modifiersLR)
+				modifiers_lr_lut[modifiersLR] = ConvertModifiersLR(modifiersLR);
+			modifiers_lr_lut_ready = true;
+		}
+
 		for (i = 0; i < hk_sorted_count; ++i)
 		{
 			hk_sorted_type &this_hk = hk_sorted[i]; // For performance and convenience.
@@ -3943,11 +3952,17 @@ void ChangeHookState(Hotkey *aHK[], int aHK_count, HookType aWhichHook, HookType
 
 			i_modifiers_merged = this_hk.modifiers;
 			if (this_hk.modifiersLR)
-				i_modifiers_merged |= ConvertModifiersLR(this_hk.modifiersLR);
+				i_modifiers_merged |= modifiers_lr_lut[this_hk.modifiersLR];
 
 			for (modifiersLR = 0; modifiersLR <= MODLR_MAX; ++modifiersLR)  // For each possible LR value.
 			{
-				modifiers = ConvertModifiersLR(modifiersLR);
+				// In addition to the next part, modifiersLR must also have the *specific* left or right keys
+				// found in i's modifiersLR.  In other words, i's modifiersLR must be a perfect subset
+				// of modifiersLR:
+				if (this_hk.modifiersLR != (modifiersLR & this_hk.modifiersLR))
+					continue;
+
+				modifiers = modifiers_lr_lut[modifiersLR];
 				if (this_hk.AllowExtraModifiers)
 				{
 					// True if modifiersLR is a superset of i's modifier value.  In other words,
@@ -3958,13 +3973,6 @@ void ChangeHookState(Hotkey *aHK[], int aHK_count, HookType aWhichHook, HookType
 				}
 				else
 					if (i_modifiers_merged != modifiers)
-						continue;
-
-				// In addition to the above, modifiersLR must also have the *specific* left or right keys
-				// found in i's modifiersLR.  In other words, i's modifiersLR must be a perfect subset
-				// of modifiersLR:
-				if (this_hk.modifiersLR) // make sure that any more specific left/rights are also present.
-					if (this_hk.modifiersLR != (modifiersLR & this_hk.modifiersLR))
 						continue;
 
 				// If above didn't "continue", modifiersLR is a valid hotkey combination so set it as such:
