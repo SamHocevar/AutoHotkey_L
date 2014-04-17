@@ -536,6 +536,7 @@ Action g_act[] =
 	, {_T("DetectHiddenWindows"), 1, 1, 1, NULL} // On/Off
 	, {_T("DetectHiddenText"), 1, 1, 1, NULL} // On/Off
 	, {_T("BlockInput"), 1, 1, 1, NULL} // On/Off
+	, {_T("ManifestHooks"), 1, 1, 1, NULL} // On/Off
 
 	, {_T("SetNumlockState"), 0, 1, 1, NULL} // On/Off/AlwaysOn/AlwaysOff or blank (unspecified) to return to normal.
 	, {_T("SetScrollLockState"), 0, 1, 1, NULL} // same

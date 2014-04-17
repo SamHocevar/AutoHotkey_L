@@ -364,6 +364,7 @@ enum enum_act {
 , ACT_SETTITLEMATCHMODE, ACT_SETFORMAT, ACT_FORMATTIME
 , ACT_SUSPEND, ACT_PAUSE
 , ACT_AUTOTRIM, ACT_STRINGCASESENSE, ACT_DETECTHIDDENWINDOWS, ACT_DETECTHIDDENTEXT, ACT_BLOCKINPUT
+, ACT_MANIFESTHOOKS
 , ACT_SETNUMLOCKSTATE, ACT_SETSCROLLLOCKSTATE, ACT_SETCAPSLOCKSTATE, ACT_SETSTORECAPSLOCKMODE
 , ACT_KEYHISTORY, ACT_LISTLINES, ACT_LISTVARS, ACT_LISTHOTKEYS
 , ACT_EDIT, ACT_RELOAD, ACT_MENU, ACT_GUI, ACT_GUICONTROL, ACT_GUICONTROLGET
@@ -671,6 +672,8 @@ struct global_struct
 	bool TitleFindFast; // Whether to use the fast mode of searching window text, or the more thorough slow mode.
 	bool DetectHiddenWindows; // Whether to detect the titles of hidden parent windows.
 	bool DetectHiddenText;    // Whether to detect the text of hidden child windows.
+	bool ManifestHooks;       // Whether to call ManifestAllHotkeysHotstringsHooks() after each "Hotkey" command.
+	bool DelayedManifestHooks;        // Whether a call to ManifestAllHotkeysHotstringsHooks() was delayed by the above.
 	bool AllowThreadToBeInterrupted;  // Whether this thread can be interrupted by custom menu items, hotkeys, or timers.
 	bool AllowTimers; // v1.0.40.01 Whether new timer threads are allowed to start during this thread.
 	bool ThreadIsCritical; // Whether this thread has been marked (un)interruptible by the "Critical" command.
@@ -743,6 +746,8 @@ inline void global_init(global_struct &g)
 	g.TitleFindFast = true; // Since it's so much faster in many cases.
 	g.DetectHiddenWindows = false;  // Same as AutoIt2 but unlike AutoIt3; seems like a more intuitive default.
 	g.DetectHiddenText = true;  // Unlike AutoIt, which defaults to false.  This setting performs better.
+	g.ManifestHooks = true;
+	g.DelayedManifestHooks = false;
 	// Not sure what the optimal default is.  1 seems too low (scripts would be very slow by default):
 	g.LinesPerCycle = -1;
 	g.IntervalBeforeRest = 10;  // sleep for 10ms every 10ms
