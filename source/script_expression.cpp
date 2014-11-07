@@ -736,6 +736,7 @@ LPTSTR Line::ExpandExpression(int aArgIndex, ResultType &aResult, ExprTokenType 
 		case SYM_CONCAT:        // resolving right_is_number for CONCAT because TokenIsPureNumeric() will take
 		case SYM_ASSIGN_CONCAT: // a long time if the string is very long and consists entirely of digits/whitespace.
 		case SYM_COMMA:
+		case SYM_ADDRESS:
 			break;
 		default:
 			// If the operand is still generic/undetermined, find out whether it is a string, integer, or float:
@@ -1319,7 +1320,7 @@ LPTSTR Line::ExpandExpression(int aArgIndex, ResultType &aResult, ExprTokenType 
 				case SYM_MULTIPLY: this_token.value_double = left_double * right_double; break;
 				case SYM_DIVIDE:
 				case SYM_FLOORDIVIDE:
-					if (right_double == 0.0) // Divide by zero produces blank result (perhaps will produce exception if script's ever support exception handlers).
+					if (right_double == 0.0) // Divide by zero produces blank result.
 					{
 						this_token.marker = _T("");
 						result_symbol = SYM_STRING;
